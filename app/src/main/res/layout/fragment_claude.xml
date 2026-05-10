@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="message..."
-            android:hintTextColor="@color/text_hint"
+            android:textColorHint="@color/text_hint"
             android:textColor="@color/text_primary"
             android:textSize="13sp"
             android:fontFamily="monospace"
