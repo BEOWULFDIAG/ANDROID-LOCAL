@@ -113,10 +113,12 @@ class TerminalFragment : Fragment() {
         override fun onColorsChanged(s: TerminalSession) {}
         override fun onTerminalCursorStateChange(state: Boolean) {}
         override fun getTerminalCursorStyle(): Int = 0
+        override fun logError(tag: String, message: String) {}
     }
 
     private fun buildViewClient() = object : TerminalViewClient {
         override fun onScale(scale: Float) = scale
+        override fun shouldBackButtonBeMappedToEscape(): Boolean = false
         override fun onSingleTapUp(e: android.view.MotionEvent?) { showKeyboard() }
         override fun copyModeChanged(copyMode: Boolean) {}
         override fun onKeyDown(k: Int, e: android.view.KeyEvent?, s: TerminalSession?) = false
