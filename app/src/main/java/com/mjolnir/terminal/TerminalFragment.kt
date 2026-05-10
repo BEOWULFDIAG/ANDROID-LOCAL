@@ -20,6 +20,8 @@ class TerminalFragment : Fragment() {
     private val viewModel: TerminalViewModel by activityViewModels()
     private var session: TerminalSession? = null
     private lateinit var prootManager: ProotManager
+    private var ctrlActive = false
+    private var altActive = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View {
         _binding = FragmentTerminalBinding.inflate(inflater, container, false)
@@ -44,7 +46,7 @@ class TerminalFragment : Fragment() {
         val cmd = prootManager.buildCommand()
         session = TerminalSession(
             cmd[0], "/root", cmd.drop(1).toTypedArray(),
-            prootManager.buildEnv(), 24, 80, buildSessionClient()
+            prootManager.buildEnv(), 24, buildSessionClient()
         ).also { binding.terminalView.attachSession(it) }
         binding.waitingText.visibility = View.GONE
     }
@@ -84,14 +86,14 @@ class TerminalFragment : Fragment() {
     private fun handleSpecialKey(key: String) {
         when (key) {
             "→ AI" -> viewModel.sendTerminalContext(captureVisibleOutput())
-            "ESC"  -> session?.write(byteArrayOf(27))
-            "TAB"  -> session?.write(byteArrayOf(9))
-            "CTRL" -> binding.terminalView.toggleControlKey()
-            "ALT"  -> binding.terminalView.toggleAltKey()
-            "↑"    -> session?.write(byteArrayOf(27, '['.code.toByte(), 'A'.code.toByte()))
-            "↓"    -> session?.write(byteArrayOf(27, '['.code.toByte(), 'B'.code.toByte()))
-            "←"    -> session?.write(byteArrayOf(27, '['.code.toByte(), 'D'.code.toByte()))
-            "→"    -> session?.write(byteArrayOf(27, '['.code.toByte(), 'C'.code.toByte()))
+            "ESC"  -> session?.write("\u001B")
+            "TAB"  -> session?.write("\t")
+            "CTRL" -> ctrlActive = !ctrlActive
+            "ALT"  -> altActive = !altActive
+            "↑"    -> session?.write("\u001B[A")
+            "↓"    -> session?.write("\u001B[B")
+            "←"    -> session?.write("\u001B[D")
+            "→"    -> session?.write("\u001B[C")
         }
     }
 
@@ -102,7 +104,7 @@ class TerminalFragment : Fragment() {
     }
 
     private fun buildSessionClient() = object : TerminalSessionClient {
-        override fun onTextChanged(s: TerminalSession) = binding.terminalView.onScreenUpdated()
+        override fun onTextChanged(s: TerminalSession) { binding.terminalView.onScreenUpdated() }
         override fun onTitleChanged(s: TerminalSession) {}
         override fun onSessionFinished(s: TerminalSession) { showWaiting() }
         override fun onCopyTextToClipboard(s: TerminalSession, t: String) {}
@@ -110,22 +112,21 @@ class TerminalFragment : Fragment() {
         override fun onBell(s: TerminalSession) {}
         override fun onColorsChanged(s: TerminalSession) {}
         override fun onTerminalCursorStateChange(state: Boolean) {}
-        override fun setTerminalShellPid(s: TerminalSession, pid: Int) {}
+        override fun getTerminalCursorStyle(): Int = 0
     }
 
     private fun buildViewClient() = object : TerminalViewClient {
         override fun onScale(scale: Float) = scale
         override fun onSingleTapUp(e: android.view.MotionEvent?) { showKeyboard() }
-        override fun shouldBackButtonBeSentToTerminal() = true
         override fun copyModeChanged(copyMode: Boolean) {}
         override fun onKeyDown(k: Int, e: android.view.KeyEvent?, s: TerminalSession?) = false
         override fun onKeyUp(k: Int, e: android.view.KeyEvent?) = false
         override fun onLongPress(e: android.view.MotionEvent?) = false
-        override fun readControlKey() = false
-        override fun readAltKey() = false
+        override fun readControlKey() = ctrlActive
+        override fun readAltKey() = altActive
         override fun readFnKey() = false
         override fun readShiftKey() = false
-        override fun onCodePoint(cp: Int, ctrl: Boolean, alt: Boolean) = false
+        override fun onCodePoint(codePoint: Int, ctrlDown: Boolean, session: TerminalSession): Boolean = false
         override fun onEmulatorSet() {}
         override fun logError(t: String, m: String) {}
         override fun logWarn(t: String, m: String) {}
