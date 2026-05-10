@@ -14,7 +14,7 @@
         <item name="editTextStyle">@style/Widget.MjolnirTerminal.EditText</item>
     </style>
 
-    <style name="Widget.MjolnirTerminal.EditText" parent="Widget.MaterialComponents.TextInputEditText">
+    <style name="Widget.MjolnirTerminal.EditText" parent="Widget.AppCompat.EditText">
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorHint">@color/text_hint</item>
         <item name="android:background">@color/bg_tertiary</item>
