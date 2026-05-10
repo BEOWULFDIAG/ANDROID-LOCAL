@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp"
+    android:background="@color/bg_primary">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MJOLNIR"
+        android:textColor="@color/text_primary"
+        android:fontFamily="monospace"
+        android:textSize="28sp"
+        android:letterSpacing="0.25"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="/ /"
+        android:textColor="@color/text_dim"
+        android:fontFamily="monospace"
+        android:textSize="16sp"
+        android:letterSpacing="0.3"
+        android:layout_marginBottom="48dp" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progressTint="@color/text_primary"
+        android:progressBackgroundTint="@color/bg_tertiary"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="INITIALISING..."
+        android:textColor="@color/text_dim"
+        android:fontFamily="monospace"
+        android:textSize="10sp"
+        android:letterSpacing="0.12"
+        android:layout_marginBottom="24dp" />
+
+    <Button
+        android:id="@+id/retry_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RETRY"
+        android:fontFamily="monospace"
+        android:textColor="@color/bg_primary"
+        android:backgroundTint="@color/text_primary"
+        android:visibility="gone" />
+
+</LinearLayout>

@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.mjolnir.terminal.app-mergeDebugResources-37:/values-port/values-port.xml",
+            "map": [
+                {
+                    "source": "/data/data/com.termux/files/home/.gradle/caches/9.5.0/transforms/b9bd5beb05266e09a0fbf66a135617d0/transformed/appcompat-1.7.0/res/values-port/values-port.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,4 @@
+-keep class com.termux.** { *; }
+-keep class com.mjolnir.terminal.** { *; }
+-dontwarn com.termux.**
+-keepattributes SourceFile,LineNumberTable

@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "com.mjolnir.terminal.app-debug-39:/layout_fragment_terminal.xml.flat",
+        "source": "com.mjolnir.terminal.app-main-41:/layout/fragment_terminal.xml"
+    },
+    {
+        "merged": "com.mjolnir.terminal.app-debug-39:/layout_key_button.xml.flat",
+        "source": "com.mjolnir.terminal.app-main-41:/layout/key_button.xml"
+    },
+    {
+        "merged": "com.mjolnir.terminal.app-debug-39:/layout_activity_main.xml.flat",
+        "source": "com.mjolnir.terminal.app-main-41:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.mjolnir.terminal.app-debug-39:/layout_fragment_claude.xml.flat",
+        "source": "com.mjolnir.terminal.app-main-41:/layout/fragment_claude.xml"
+    },
+    {
+        "merged": "com.mjolnir.terminal.app-debug-39:/layout_item_message.xml.flat",
+        "source": "com.mjolnir.terminal.app-main-41:/layout/item_message.xml"
+    },
+    {
+        "merged": "com.mjolnir.terminal.app-debug-39:/layout_activity_setup.xml.flat",
+        "source": "com.mjolnir.terminal.app-main-41:/layout/activity_setup.xml"
+    }
+]
