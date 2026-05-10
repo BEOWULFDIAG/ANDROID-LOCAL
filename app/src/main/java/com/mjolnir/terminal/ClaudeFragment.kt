@@ -62,7 +62,7 @@ class ClaudeFragment : Fragment() {
         val service = claudeService ?: return
         lifecycleScope.launch {
             service.stream(
-                history = viewModel.conversationHistory().dropLast(1),
+                history = viewModel.conversationHistory(),
                 onToken = { token -> viewModel.appendToLastAssistantMessage(token); scrollToBottom() },
                 onError = { err ->
                     viewModel.updateLastAssistantMessage("Error: $err", streaming = false)

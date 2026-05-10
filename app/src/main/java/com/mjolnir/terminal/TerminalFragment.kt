@@ -65,7 +65,7 @@ class TerminalFragment : Fragment() {
         session?.emulator?.let { emulator ->
             val sb = StringBuilder()
             val screen = emulator.screen
-            for (row in 0 until screen.activeRows) {
+            for (row in 0 until emulator.mRows) {
                 sb.appendLine(screen.getSelectedText(0, row, emulator.mColumns, row).trimEnd())
             }
             sb.toString().trimEnd()
@@ -114,11 +114,20 @@ class TerminalFragment : Fragment() {
         override fun onTerminalCursorStateChange(state: Boolean) {}
         override fun getTerminalCursorStyle(): Int = 0
         override fun logError(tag: String, message: String) {}
+        override fun logWarn(tag: String, message: String) {}
+        override fun logInfo(tag: String, message: String) {}
+        override fun logDebug(tag: String, message: String) {}
+        override fun logVerbose(tag: String, message: String) {}
+        override fun logStackTraceWithMessage(tag: String, message: String, e: Exception?) {}
+        override fun logStackTrace(tag: String, e: Exception?) {}
     }
 
     private fun buildViewClient() = object : TerminalViewClient {
         override fun onScale(scale: Float) = scale
         override fun shouldBackButtonBeMappedToEscape(): Boolean = false
+        override fun shouldEnforceCharBasedInput(): Boolean = false
+        override fun shouldUseCtrlSpaceWorkaround(): Boolean = false
+        override fun isTerminalViewSelected(): Boolean = false
         override fun onSingleTapUp(e: android.view.MotionEvent?) { showKeyboard() }
         override fun copyModeChanged(copyMode: Boolean) {}
         override fun onKeyDown(k: Int, e: android.view.KeyEvent?, s: TerminalSession?) = false
