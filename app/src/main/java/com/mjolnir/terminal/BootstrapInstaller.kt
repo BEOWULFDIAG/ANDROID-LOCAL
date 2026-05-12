@@ -9,10 +9,10 @@ import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
 private const val FEDORA_ROOTFS_URL =
-    "https://github.com/termux/proot-distro/releases/download/v4.22.1/fedora-aarch64-pd-v4.22.1.tar.xz"
+    "https://github.com/termux/proot-distro/releases/download/v4.31.0/fedora-aarch64-pd-v4.31.0.tar.xz"
 
 private const val PROOT_URL =
-    "https://github.com/proot-me/proot/releases/download/v5.4.0/proot-v5.4.0-aarch64-static"
+    "https://github.com/proot-me/proot-static-build/raw/master/static/proot-arm64"
 
 class BootstrapInstaller(
     private val prootManager: ProotManager,
