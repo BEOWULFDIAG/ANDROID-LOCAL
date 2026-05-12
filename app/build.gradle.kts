@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "com.mjolnir.terminal"
     compileSdk = 34
+    signingConfigs { getByName("debug") { enableV1Signing = true; enableV2Signing = true; enableV3Signing = true } }
 
     defaultConfig {
         applicationId = "com.mjolnir.terminal"
