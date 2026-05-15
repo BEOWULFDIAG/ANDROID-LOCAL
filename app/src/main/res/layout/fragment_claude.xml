@@ -3,11 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:fitsSystemWindows="true"
     android:background="@color/bg_primary">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_height="48dp"
         android:orientation="horizontal"
         android:paddingStart="12dp"
         android:paddingEnd="8dp"
@@ -21,21 +22,25 @@
             android:text="MJOLNIR // CLAUDE"
             android:textColor="@color/text_dim"
             android:fontFamily="monospace"
-            android:textSize="9sp"
-            android:letterSpacing="0.15" />
+            android:textSize="11sp"
+            android:letterSpacing="0.1"
+            android:ellipsize="end"
+            android:maxLines="1" />
 
         <Button
             android:id="@+id/api_key_button"
             android:layout_width="wrap_content"
-            android:layout_height="24dp"
+            android:layout_height="34dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:text="SET KEY"
-            android:textSize="8sp"
+            android:textSize="11sp"
             android:fontFamily="monospace"
-            android:letterSpacing="0.1"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:letterSpacing="0.08"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:backgroundTint="@color/bg_tertiary"
-            android:textColor="@color/text_dim" />
+            android:textColor="@color/claude_orange" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -55,7 +60,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="@color/bg_secondary"
-        android:padding="6dp"
+        android:padding="8dp"
         android:gravity="center_vertical">
 
         <EditText
@@ -65,27 +70,27 @@
             android:layout_weight="1"
             android:hint="message..."
             android:textColorHint="@color/text_hint"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/claude_orange"
             android:textSize="13sp"
             android:fontFamily="monospace"
             android:background="@color/bg_tertiary"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:imeOptions="actionSend"
             android:inputType="textMultiLine|textAutoCorrect"
             android:maxLines="4" />
 
         <Button
             android:id="@+id/send_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="6dp"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="8dp"
             android:text="↑"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textColor="@color/bg_primary"
-            android:backgroundTint="@color/text_primary"
+            android:backgroundTint="@color/claude_orange"
             android:padding="0dp" />
     </LinearLayout>
 

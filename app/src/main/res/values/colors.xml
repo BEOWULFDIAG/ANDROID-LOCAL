@@ -18,4 +18,6 @@
 
     <!-- System -->
     <color name="status_bar">#0D0D0D</color>
+    <color name="terminal_green">#00FF41</color>
+    <color name="claude_orange">#FF8C42</color>
 </resources>

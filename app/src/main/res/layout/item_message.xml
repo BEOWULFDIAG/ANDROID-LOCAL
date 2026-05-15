@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="monospace"
-        android:textColor="@color/text_primary"
+        android:textColor="@color/claude_orange"
         android:textSize="12sp"
         android:lineSpacingMultiplier="1.4"
         android:textIsSelectable="true" />

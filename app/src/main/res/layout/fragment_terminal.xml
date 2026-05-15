@@ -3,11 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:fitsSystemWindows="true"
     android:background="@color/terminal_bg">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_height="48dp"
         android:orientation="horizontal"
         android:paddingStart="12dp"
         android:paddingEnd="8dp"
@@ -21,35 +22,41 @@
             android:text="MJOLNIR // TERMINAL"
             android:textColor="@color/text_dim"
             android:fontFamily="monospace"
-            android:textSize="9sp"
-            android:letterSpacing="0.15" />
+            android:textSize="11sp"
+            android:letterSpacing="0.1"
+            android:ellipsize="end"
+            android:maxLines="1" />
 
         <Button
             android:id="@+id/fedora_toggle"
             android:layout_width="wrap_content"
-            android:layout_height="24dp"
+            android:layout_height="34dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:text="TERMUX"
-            android:textSize="8sp"
+            android:textSize="11sp"
             android:fontFamily="monospace"
-            android:letterSpacing="0.1"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:layout_marginEnd="4dp"
+            android:letterSpacing="0.08"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:layout_marginEnd="8dp"
             android:backgroundTint="@color/bg_tertiary"
-            android:textColor="@color/text_dim" />
+            android:textColor="@color/terminal_green" />
 
         <Button
             android:id="@+id/send_to_ai"
             android:layout_width="wrap_content"
-            android:layout_height="24dp"
+            android:layout_height="34dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:text="→ AI"
-            android:textSize="8sp"
+            android:textSize="11sp"
             android:fontFamily="monospace"
-            android:letterSpacing="0.1"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:letterSpacing="0.08"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:backgroundTint="@color/bg_tertiary"
-            android:textColor="@color/text_dim" />
+            android:textColor="@color/terminal_green" />
     </LinearLayout>
 
     <ScrollView
@@ -57,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="10dp"
+        android:padding="12dp"
         android:scrollbars="none">
 
         <TextView
@@ -65,8 +72,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="monospace"
-            android:textSize="11sp"
-            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:textColor="@color/terminal_green"
             android:textIsSelectable="true"
             android:text="MJOLNIR terminal ready.\nType a command and tap RUN.\nToggle TERMUX/FEDORA in the header.\n" />
     </ScrollView>
@@ -75,7 +82,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="6dp"
+        android:padding="8dp"
         android:background="@color/bg_secondary"
         android:gravity="center_vertical">
 
@@ -86,14 +93,14 @@
             android:layout_weight="1"
             android:hint="command..."
             android:textColorHint="@color/text_hint"
-            android:textColor="@color/text_primary"
-            android:textSize="12sp"
+            android:textColor="@color/terminal_green"
+            android:textSize="13sp"
             android:fontFamily="monospace"
             android:background="@color/bg_tertiary"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:inputType="text"
             android:imeOptions="actionGo"
             android:maxLines="3" />
@@ -101,15 +108,16 @@
         <Button
             android:id="@+id/run_button"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginStart="6dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="8dp"
             android:text="RUN"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:fontFamily="monospace"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
+            android:letterSpacing="0.1"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
             android:textColor="@color/bg_primary"
-            android:backgroundTint="@color/text_primary" />
+            android:backgroundTint="@color/terminal_green" />
     </LinearLayout>
 
 </LinearLayout>
