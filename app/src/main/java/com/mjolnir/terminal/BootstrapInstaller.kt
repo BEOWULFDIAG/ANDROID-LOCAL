@@ -79,7 +79,7 @@ class BootstrapInstaller(
             TarArchiveInputStream(xz).use { tar ->
                 while (true) {
                     val entry = tar.nextEntry as? TarArchiveEntry ?: break
-                    writeEntry(entry, dest, tar)
+                    runCatching { writeEntry(entry, dest, tar) }
                 }
             }
         }
