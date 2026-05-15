@@ -21,28 +21,24 @@ class TermuxBridge(private val context: Context) {
     suspend fun execute(command: String, workdir: String = TERMUX_HOME): CommandResult =
         suspendCancellableCoroutine { cont ->
             val action = "com.mjolnir.terminal.CMD_RESULT_${System.nanoTime()}"
-            val receiver = makeReceiver { result ->
-                runCatching { context.unregisterReceiver(it) }
-                cont.resume(result)
+            lateinit var receiver: BroadcastReceiver
+            receiver = object : BroadcastReceiver() {
+                override fun onReceive(c: Context, intent: Intent) {
+                    runCatching { context.unregisterReceiver(receiver) }
+                    val b = intent.getBundleExtra("result")
+                    cont.resume(CommandResult(
+                        stdout = b?.getString("stdout").orEmpty(),
+                        stderr = b?.getString("stderr").orEmpty(),
+                        exitCode = b?.getInt("exitCode", -1) ?: -1,
+                        error = b?.getString("errmsg")
+                    ))
+                }
             }
             registerReceiver(receiver, action)
             cont.invokeOnCancellation { runCatching { context.unregisterReceiver(receiver) } }
             launch(command, workdir, action) { error ->
                 runCatching { context.unregisterReceiver(receiver) }
                 cont.resume(CommandResult("", error, -1, "launch_error"))
-            }
-        }
-
-    private fun makeReceiver(onResult: BroadcastReceiver.(CommandResult) -> Unit) =
-        object : BroadcastReceiver() {
-            override fun onReceive(c: Context, intent: Intent) {
-                val b = intent.getBundleExtra("result")
-                onResult(CommandResult(
-                    stdout = b?.getString("stdout").orEmpty(),
-                    stderr = b?.getString("stderr").orEmpty(),
-                    exitCode = b?.getInt("exitCode", -1) ?: -1,
-                    error = b?.getString("errmsg")
-                ))
             }
         }
 
