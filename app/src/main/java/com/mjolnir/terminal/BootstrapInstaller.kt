@@ -4,6 +4,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
@@ -72,11 +75,44 @@ class BootstrapInstaller(
     }
 
     private fun extractTarXz(archive: File, dest: File) {
-        val pb = ProcessBuilder("tar", "-xJf", archive.absolutePath, "-C", dest.absolutePath,
-            "--strip-components=1")
-            .redirectErrorStream(true)
-            .start()
-        check(pb.waitFor() == 0) { "Extraction failed:\n${pb.inputStream.bufferedReader().readText()}" }
+        XZCompressorInputStream(archive.inputStream().buffered()).use { xz ->
+            TarArchiveInputStream(xz).use { tar ->
+                while (true) {
+                    val entry = tar.nextEntry as? TarArchiveEntry ?: break
+                    writeEntry(entry, dest, tar)
+                }
+            }
+        }
+    }
+
+    private fun writeEntry(entry: TarArchiveEntry, dest: File, tar: TarArchiveInputStream) {
+        val rel = entry.name.substringAfter('/', "")
+        if (rel.isEmpty()) return
+        val outFile = File(dest, rel)
+        outFile.parentFile?.mkdirs()
+        when {
+            entry.isSymbolicLink -> writeSymlink(outFile, entry.linkName)
+            entry.isLink -> writeHardlink(outFile, File(dest, entry.linkName.substringAfter('/', "")))
+            entry.isDirectory -> outFile.mkdirs()
+            else -> writeRegularFile(outFile, tar, entry.mode)
+        }
+    }
+
+    private fun writeSymlink(target: File, linkName: String) {
+        target.delete()
+        runCatching { java.nio.file.Files.createSymbolicLink(target.toPath(), java.io.File(linkName).toPath()) }
+    }
+
+    private fun writeHardlink(target: File, source: File) {
+        if (!source.exists()) return
+        target.delete()
+        runCatching { java.nio.file.Files.createLink(target.toPath(), source.toPath()) }
+            .onFailure { source.copyTo(target, overwrite = true) }
+    }
+
+    private fun writeRegularFile(outFile: File, tar: TarArchiveInputStream, mode: Int) {
+        outFile.outputStream().use { tar.copyTo(it) }
+        if (mode and 0x49 != 0) outFile.setExecutable(true, false)
     }
 
     private fun configureRootfs() {
