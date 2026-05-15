@@ -12,9 +12,8 @@ android {
         applicationId = "com.mjolnir.terminal"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
-        ndk { abiFilters += "arm64-v8a" }
+        versionCode = 2
+        versionName = "2.0.0"
     }
 
     buildTypes {
@@ -35,10 +34,6 @@ android {
 
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { viewBinding = true }
-
-    packaging {
-        resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
-    }
 }
 
 dependencies {
@@ -52,10 +47,4 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("org.json:json:20240303")
-    implementation("org.apache.commons:commons-compress:1.26.1")
-    implementation("org.tukaani:xz:1.9")
-
-    // Termux terminal engine
-    implementation("com.github.termux.termux-app:terminal-emulator:v0.118.0")
-    implementation("com.github.termux.termux-app:terminal-view:v0.118.0")
 }

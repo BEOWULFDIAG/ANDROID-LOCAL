@@ -4,153 +4,90 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import com.mjolnir.terminal.databinding.FragmentTerminalBinding
-import com.termux.terminal.TerminalSession
-import com.termux.terminal.TerminalSessionClient
-import com.termux.view.TerminalViewClient
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class TerminalFragment : Fragment() {
 
     private var _binding: FragmentTerminalBinding? = null
     private val binding get() = _binding!!
     private val viewModel: TerminalViewModel by activityViewModels()
-    private var session: TerminalSession? = null
-    private lateinit var prootManager: ProotManager
-    private var ctrlActive = false
-    private var altActive = false
+    private lateinit var bridge: TermuxBridge
+    private var useFedora = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View {
         _binding = FragmentTerminalBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        prootManager = ProotManager(requireContext())
-        setupTerminalView()
-        setupKeyboardBar()
-        if (prootManager.isReady()) startSession() else showWaiting()
+    override fun onViewCreated(view: View, saved: Bundle?) {
+        super.onViewCreated(view, saved)
+        bridge = TermuxBridge(requireContext())
+        binding.runButton.setOnClickListener { runCurrentCommand() }
+        binding.fedoraToggle.setOnClickListener { useFedora = !useFedora; updateToggleLabel() }
+        binding.sendToAi.setOnClickListener { viewModel.sendTerminalContext(viewModel.visibleTerminalText()) }
+        binding.commandInput.setOnEditorActionListener { _, _, _ -> runCurrentCommand(); true }
+        updateToggleLabel()
+        observeLog()
+        if (!bridge.isTermuxInstalled()) showSetupHelp()
     }
 
-    private fun setupTerminalView() {
-        binding.terminalView.setTerminalViewClient(buildViewClient())
-        binding.terminalView.setOnClickListener { showKeyboard() }
-    }
+    private fun updateToggleLabel() { binding.fedoraToggle.text = if (useFedora) "FEDORA" else "TERMUX" }
 
-    private fun startSession() {
-        prootManager.prepareProotBinary()
-        val cmd = prootManager.buildCommand()
-        session = TerminalSession(
-            cmd[0], "/root", cmd.drop(1).toTypedArray(),
-            prootManager.buildEnv(), 24, buildSessionClient()
-        ).also { binding.terminalView.attachSession(it) }
-        binding.waitingText.visibility = View.GONE
-    }
-
-    private fun showWaiting() {
-        binding.waitingText.visibility = View.VISIBLE
-        binding.waitingText.text = "WAITING FOR BOOTSTRAP..."
-    }
-
-    fun onBootstrapComplete() {
-        binding.waitingText.visibility = View.GONE
-        startSession()
-    }
-
-    fun captureVisibleOutput(): String =
-        session?.emulator?.let { emulator ->
-            val sb = StringBuilder()
-            val screen = emulator.screen
-            for (row in 0 until emulator.mRows) {
-                sb.appendLine(screen.getSelectedText(0, row, emulator.mColumns, row).trimEnd())
-            }
-            sb.toString().trimEnd()
-        } ?: ""
-
-    private fun setupKeyboardBar() {
-        val keys = listOf("ESC", "TAB", "CTRL", "ALT", "↑", "↓", "←", "→", "→ AI")
-        keys.forEach { key ->
-            val btn = layoutInflater.inflate(R.layout.key_button, binding.keyboardBar, false)
-            (btn as android.widget.Button).apply {
-                text = key
-                setOnClickListener { handleSpecialKey(key) }
-            }
-            binding.keyboardBar.addView(btn)
+    private fun showSetupHelp() {
+        binding.terminalOutput.text = buildString {
+            append("Termux not installed.\n\n")
+            append("1. Install Termux from F-Droid:\n")
+            append("   https://f-droid.org/packages/com.termux/\n\n")
+            append("2. Open Termux and run:\n")
+            append("   mkdir -p ~/.termux\n")
+            append("   echo 'allow-external-apps = true' >> ~/.termux/termux.properties\n")
+            append("   termux-reload-settings\n")
+            append("   pkg install proot-distro\n")
+            append("   proot-distro install fedora\n\n")
+            append("3. Reopen this app.\n")
         }
     }
 
-    private fun handleSpecialKey(key: String) {
-        when (key) {
-            "→ AI" -> viewModel.sendTerminalContext(captureVisibleOutput())
-            "ESC"  -> session?.write("\u001B")
-            "TAB"  -> session?.write("\t")
-            "CTRL" -> ctrlActive = !ctrlActive
-            "ALT"  -> altActive = !altActive
-            "↑"    -> session?.write("\u001B[A")
-            "↓"    -> session?.write("\u001B[B")
-            "←"    -> session?.write("\u001B[D")
-            "→"    -> session?.write("\u001B[C")
+    private fun runCurrentCommand() {
+        val cmd = binding.commandInput.text?.toString()?.trim().orEmpty()
+        if (cmd.isEmpty()) return
+        binding.commandInput.text?.clear()
+        val wrapped = if (useFedora) "proot-distro login fedora -- bash -lc ${shellQuote(cmd)}" else cmd
+        val id = viewModel.startCommand(cmd)
+        lifecycleScope.launch {
+            val r = bridge.execute(wrapped)
+            val stderrOrError = if (r.stderr.isNotBlank()) r.stderr else r.error.orEmpty()
+            viewModel.finishCommand(id, r.stdout, stderrOrError, r.exitCode)
         }
     }
 
-    private fun showKeyboard() {
-        binding.terminalView.requestFocus()
-        requireContext().getSystemService<InputMethodManager>()
-            ?.showSoftInput(binding.terminalView, 0)
+    private fun shellQuote(s: String) = "'" + s.replace("'", "'\\''") + "'"
+
+    private fun observeLog() {
+        lifecycleScope.launch {
+            viewModel.terminalLog.collectLatest { entries ->
+                binding.terminalOutput.text = entries.joinToString("\n\n", postfix = "\n") { fmt(it) }
+                binding.terminalScroll.post { binding.terminalScroll.fullScroll(View.FOCUS_DOWN) }
+            }
+        }
     }
 
-    private fun buildSessionClient() = object : TerminalSessionClient {
-        override fun onTextChanged(s: TerminalSession) { binding.terminalView.onScreenUpdated() }
-        override fun onTitleChanged(s: TerminalSession) {}
-        override fun onSessionFinished(s: TerminalSession) { showWaiting() }
-        override fun onCopyTextToClipboard(s: TerminalSession, t: String) {}
-        override fun onPasteTextFromClipboard(s: TerminalSession?) {}
-        override fun onBell(s: TerminalSession) {}
-        override fun onColorsChanged(s: TerminalSession) {}
-        override fun onTerminalCursorStateChange(state: Boolean) {}
-        override fun getTerminalCursorStyle(): Int = 0
-        override fun logError(tag: String, message: String) {}
-        override fun logWarn(tag: String, message: String) {}
-        override fun logInfo(tag: String, message: String) {}
-        override fun logDebug(tag: String, message: String) {}
-        override fun logVerbose(tag: String, message: String) {}
-        override fun logStackTraceWithMessage(tag: String, message: String, e: Exception?) {}
-        override fun logStackTrace(tag: String, e: Exception?) {}
+    private fun fmt(e: TerminalEntry): String = buildString {
+        append("$ ").append(e.command).append('\n')
+        when {
+            e.running -> append("[running...]")
+            else -> {
+                if (e.stdout.isNotEmpty()) append(e.stdout.trimEnd())
+                if (e.stderr.isNotBlank()) { if (!endsWith('\n') && isNotEmpty()) append('\n'); append(e.stderr.trimEnd()) }
+                append("\n[exit ").append(e.exitCode).append(']')
+            }
+        }
     }
 
-    private fun buildViewClient() = object : TerminalViewClient {
-        override fun onScale(scale: Float) = scale
-        override fun shouldBackButtonBeMappedToEscape(): Boolean = false
-        override fun shouldEnforceCharBasedInput(): Boolean = false
-        override fun shouldUseCtrlSpaceWorkaround(): Boolean = false
-        override fun isTerminalViewSelected(): Boolean = false
-        override fun onSingleTapUp(e: android.view.MotionEvent?) { showKeyboard() }
-        override fun copyModeChanged(copyMode: Boolean) {}
-        override fun onKeyDown(k: Int, e: android.view.KeyEvent?, s: TerminalSession?) = false
-        override fun onKeyUp(k: Int, e: android.view.KeyEvent?) = false
-        override fun onLongPress(e: android.view.MotionEvent?) = false
-        override fun readControlKey() = ctrlActive
-        override fun readAltKey() = altActive
-        override fun readFnKey() = false
-        override fun readShiftKey() = false
-        override fun onCodePoint(codePoint: Int, ctrlDown: Boolean, session: TerminalSession): Boolean = false
-        override fun onEmulatorSet() {}
-        override fun logError(t: String, m: String) {}
-        override fun logWarn(t: String, m: String) {}
-        override fun logInfo(t: String, m: String) {}
-        override fun logDebug(t: String, m: String) {}
-        override fun logVerbose(t: String, m: String) {}
-        override fun logStackTraceWithMessage(t: String, m: String, e: Exception?) {}
-        override fun logStackTrace(t: String, e: Exception?) {}
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        session?.finishIfRunning()
-        _binding = null
-    }
+    override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }

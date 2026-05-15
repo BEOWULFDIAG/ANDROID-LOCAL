@@ -1,9 +1,7 @@
 package com.mjolnir.terminal
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
-import android.view.ViewGroup.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import com.mjolnir.terminal.databinding.ActivityMainBinding
@@ -18,14 +16,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        val prootManager = ProotManager(this)
-        if (!prootManager.isReady()) {
-            startActivity(Intent(this, SetupActivity::class.java))
-            finish()
-            return
-        }
-
         if (savedInstanceState == null) {
             supportFragmentManager.commit {
                 replace(R.id.terminal_container, TerminalFragment())
@@ -36,18 +26,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupDividerDrag() {
-        binding.divider.setOnTouchListener { _, event ->
+        binding.divider.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     dragStartY = event.rawY
                     terminalStartHeight = binding.terminalContainer.height
                     true
                 }
-                MotionEvent.ACTION_MOVE -> {
-                    val delta = (event.rawY - dragStartY).toInt()
-                    applyDividerDrag(delta)
-                    true
-                }
+                MotionEvent.ACTION_MOVE -> { applyDividerDrag((event.rawY - dragStartY).toInt()); true }
+                MotionEvent.ACTION_UP -> { v.performClick(); true }
                 else -> false
             }
         }
@@ -55,9 +42,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyDividerDrag(delta: Int) {
         val totalHeight = binding.root.height - binding.divider.height
-        val minHeight = (totalHeight * 0.2f).toInt()
-        val maxHeight = (totalHeight * 0.8f).toInt()
-        val newHeight = (terminalStartHeight + delta).coerceIn(minHeight, maxHeight)
+        val newHeight = (terminalStartHeight + delta).coerceIn(
+            (totalHeight * 0.2f).toInt(), (totalHeight * 0.8f).toInt()
+        )
         binding.terminalContainer.layoutParams =
             binding.terminalContainer.layoutParams.apply { height = newHeight }
         binding.terminalContainer.requestLayout()
